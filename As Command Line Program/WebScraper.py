@@ -113,3 +113,13 @@ class WebScraper():
     
     def query_results(self, word):
         return self.__results.get(word.lower(), "Word was not found in scrape: " + word)
+
+    def query_results_file(self, word):
+        try:
+            with open("result.json", "r") as infile:
+                results = json.load(infile)
+                infile.close()
+            return results.get(word.lower(), "Word was not found in scrape: " + word)
+        except ValueError as e:
+            self.__logger.error(e)
+            return "An Error Occurred while querying the results file"
