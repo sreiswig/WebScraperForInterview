@@ -22,18 +22,22 @@ class WebScraper():
 
     Methods:
     --------
-    scrape_url(url, curr_depth=0, max_depth=2):
+    scrape_url(url):
         Scrapes a url and all of its links up to a certain depth, results are stored in the __results attribute
+    scrape_url_worker(url):
+        Scrapes a url for words and stores them in the __results attribute could be used in a thread pool in the future
     extract_words(text):
         Cleans and extracts words from a string of text
     is_hyphenated_word(word):
-        Helper function that checks if a hyphenated word is valid
+        Helper function that checks if a hyphenated word is a valid word
     save(filename="result.json", destination="filesystem"):
         Saves the results of the last scrape to a file as a json object
     clear_results():
         Clears the results of the last scrape
     query_results(word):
         Returns the results of the last scrape for a given word
+    query_results_file(word):
+        Returns the results of the last scrape for a given word from a file
     """
     __results = dict()
     __logger = logging.getLogger('webscraper_logger')
