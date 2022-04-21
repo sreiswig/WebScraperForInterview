@@ -13,10 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
 from django.contrib import admin
+from django.views.static import serve
 from django.urls import path, include
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FLUTTER_WEB_APP = os.path.join(BASE_DIR, 'flutterPage')
+
+def flutter_redirect(request, resource):
+    return serve(request, resource, FLUTTER_WEB_APP)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('flutterPage/', lambda r: flutter_redirect(r, 'index.html')),
+    path('flutterPage/<path:resource>', flutter_redirect),
     path('webscraperapi/', include('webscraperapi.urls')),
 ]

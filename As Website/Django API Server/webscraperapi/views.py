@@ -1,29 +1,30 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt # Allow request without csrf_token set
-from rest_framework.decorators import api_view
+from django.http import HttpRequest, JsonResponse, HttpResponse
+from WebScraper import WebScraper
+from django.views.decorators.csrf import csrf_exempt
+import json
 
-# Import my_worker from .utilities
-from .utilities import web_scraper_worker
-from .utilities import word_query_worker
-
+# Create your views here.
 @csrf_exempt
-@api_view('POST')
-def web_scraper(request, url):
-    """
-    Do something with 
-    """
+def index(request):
     if request.method == 'POST':
-        # Call the utilities script here
-        result = web_scraper_worker(url)
-        return JsonResponse({'result': result})
-
-@csrf_exempt
-@api_view('POST')
-def word_query(request, word):
-    """
-    Do something with 
-    """
-    if request.method == 'POST':
-        # Call the utilities script here
-        result = word_query_worker(word)
-        return JsonResponse({'result': result})
+        json_data = json.loads(request.body)
+        if 'url' in json_data:
+            print('POST with url: ' + json_data['url'])
+            url = json_data['url']
+            scraper = WebScraper()
+            scraper.scrape_url(url)
+            scraper.save()
+            return HttpResponse(status = 200)
+        elif 'word' in json_data:
+            print('POST with word: ' + json_data['word'])
+            word = json_data['word']
+            scraper = WebScraper()
+            results = scraper.query_results_file(word)
+            print(results)
+            return JsonResponse(results, safe=False, status = 200)
+        else:
+            print('POST with no data')
+            return HttpResponse(status = 400)
+    else:
+        print("Default")
+        return JsonResponse({'message': 'Hello, world!'})
