@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 Future<String> scrapeURL(String url) async {
   var response = await http.post(
-    Uri.parse('192.168.0.1:8000'),
+    Uri.parse('http://localhost:8000/webscraperapi/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -14,19 +14,27 @@ Future<String> scrapeURL(String url) async {
     }),
   );
 
-  if (response.statusCode == 201) {
+  if (response.statusCode == 200) {
     return "Success";
   } else {
-    throw Exception('Failed to scrape URL');
+    return "Failure";
   }
 }
 
 Future<WordQuery> fetchWordResults(String word) async {
-  final response = await http.get(Uri.parse("todo"));
+  final response = await http.post(
+    Uri.parse("http://localhost:8000/webscraperapi/"),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{
+      'word': word,
+    }),
+  );
   if (response.statusCode == 200) {
     return WordQuery.fromJson(jsonDecode(response.body));
   } else {
-    throw Exception('Failed to load WordQuery');
+    return WordQuery();
   }
 }
 
@@ -76,6 +84,7 @@ class MyStatefulWidget extends StatefulWidget {
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   late TextEditingController _controller;
   late Future<WordQuery> _futureWordQuery;
+  late Future<String> _futureScrapeURL;
 
   @override
   void initState() {
@@ -119,11 +128,26 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      _futureScrapeURL = scrapeURL(_controller.text);
+                      if (_futureScrapeURL == "Success") {
+                        _controller.text = "Successfully Scraped";
+                      } else {
+                        _controller.text = "Failed to Scrape";
+                      }
+                    });
+                  },
                   child: const Text('Scrape URL'),
                 ),
                 ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        _futureWordQuery =
+                            fetchWordResults(_controller.text.trim());
+                        _controller.text = _futureWordQuery.toString();
+                      });
+                    },
                     child: const Text('Query Scrape Results')),
               ],
             )
